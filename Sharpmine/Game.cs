@@ -16,26 +16,88 @@ namespace Sharpmine
 {
     internal class Game : GameWindow
     {
-        float[] vertices =
+
+        List<Vector3> vertices = new List<Vector3>()
         {
-            -0.5f, 0.5f, 0f, // Bottom left vertex 0
-            0.5f, 0.5f, 0f, // Top left vertex 1
-            0.5f, -0.5f, 0f, // Bottom right vertex 2
-            -0.5f, -0.5f, 0f // Bottom left vertex 3
+            // Front face vertices
+            new Vector3(-0.5f, 0.5f, 0.5f), // topleft vert
+            new Vector3(0.5f, 0.5f, 0.5f), // topright vert
+            new Vector3(0.5f, -0.5f, 0.5f), // bottomright vert
+            new Vector3(-0.5f, -0.5f, 0.5f), // bottomleft vert
+            // Right face vertices
+            new Vector3(0.5f, 0.5f, 0.5f), // topleft vert
+            new Vector3(0.5f, 0.5f, -0.5f), // topright vert
+            new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
+            new Vector3(0.5f, -0.5f, 0.5f), // bottomleft vert
+            // Back face vertices
+            new Vector3(0.5f, 0.5f, -0.5f), // topleft vert
+            new Vector3(-0.5f, 0.5f, -0.5f), // topright vert
+            new Vector3(-0.5f, -0.5f, -0.5f), // bottomright vert
+            new Vector3(0.5f, -0.5f, -0.5f), // bottomleft vert
+            // Left face vertices
+            new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
+            new Vector3(-0.5f, 0.5f, 0.5f), // topright vert
+            new Vector3(-0.5f, -0.5f, 0.5f), // bottomright vert
+            new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
+            // Top face vertices
+            new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
+            new Vector3(0.5f, 0.5f, -0.5f), // topright vert
+            new Vector3(0.5f, 0.5f, 0.5f), // bottomright vert
+            new Vector3(-0.5f, 0.5f, 0.5f), // bottomleft vert
+            // Bottom face vertices
+            new Vector3(-0.5f, -0.5f, 0.5f), // topleft vert
+            new Vector3(0.5f, -0.5f, 0.5f), // topright vert
+            new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
+            new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
         };
 
-        float[] texCoords =
+        List<Vector2> texCoords = new List<Vector2>()
         {
-            0f, 1f, // Bottom left vertex 0
-            1f, 1f, // Top left vertex 1
-            1f, 0f, // Bottom right vertex 2
-            0f, 0f // Bottom left vertex 3
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
+
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
+
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
+
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
+
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
+
+            new Vector2(0f, 1f),
+            new Vector2(1f, 1f),
+            new Vector2(1f, 0f),
+            new Vector2(0f, 0f),
         };
 
         uint[] indices =
         {
-            0, 1, 2, // First triangle
-            2, 3, 0 // Second triangle
+            0, 1, 2,
+            2, 3, 0,
+            4, 5, 6,
+            6, 7, 4,
+            8, 9, 10,
+            10, 11, 8, 
+            12, 13, 14,
+            14, 15, 12,
+            16, 17, 18,
+            18, 19, 16,
+            20, 21, 22,
+            22, 23, 20
         };
 
         // Render Pipeline vars
@@ -45,6 +107,7 @@ namespace Sharpmine
         int shaderProgram;
         int ebo;
         int textureId;
+        Camera camera;
 
 
         int width, height;
@@ -77,7 +140,7 @@ namespace Sharpmine
             // --- Vertex VBO
             vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Count * Vector3.SizeInBytes, vertices.ToArray(), BufferUsageHint.StaticDraw);
 
             // put the vertex VBO in slot 0 of our VAO
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
@@ -89,7 +152,7 @@ namespace Sharpmine
             // --- Texture VBO
             textureVbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, textureVbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Length * sizeof(float), texCoords, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Count * Vector2.SizeInBytes, texCoords.ToArray(), BufferUsageHint.StaticDraw);
 
             // put the texture VBO in slot 1 of our VAO
 
@@ -143,6 +206,11 @@ namespace Sharpmine
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, dirtTexture.Width, dirtTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, dirtTexture.Data);
             // Unbind the texture
             GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            GL.Enable(EnableCap.DepthTest);
+
+            camera = new Camera(width, height, new Vector3(0f, 0f, 3f));
+            CursorState = CursorState.Grabbed; // Hide the cursor and lock it to the window
         }
 
         protected override void OnUnload()
@@ -158,7 +226,7 @@ namespace Sharpmine
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             GL.ClearColor(1f, 0.5f, 0.3f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             // Draw triangle
             GL.UseProgram(shaderProgram);
@@ -166,6 +234,21 @@ namespace Sharpmine
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
 
             GL.BindTexture(TextureTarget.Texture2D, textureId);
+
+            // Transformation matrices
+            Matrix4 model = Matrix4.Identity;
+            Matrix4 view = camera.getViewMatrix();
+            Matrix4 projection = camera.getProjectionMatrix();
+            model = Matrix4.CreateTranslation(0f, 0f, -3f);
+
+            int modelLocation = GL.GetUniformLocation(shaderProgram, "model");
+            int viewLocation = GL.GetUniformLocation(shaderProgram, "view");
+            int projectionLocation = GL.GetUniformLocation(shaderProgram, "projection");
+
+            GL.UniformMatrix4(modelLocation, true, ref model);
+            GL.UniformMatrix4(viewLocation, true, ref view);
+            GL.UniformMatrix4(projectionLocation, true, ref projection);
+
             GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
             //GL.DrawArrays(PrimitiveType.Triangles, 0, 4);
 
@@ -175,7 +258,11 @@ namespace Sharpmine
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
+            MouseState mouse = MouseState;
+            KeyboardState input = KeyboardState;
             base.OnUpdateFrame(args);
+            camera.Update(input, mouse, args);
+
             if (KeyboardState.IsKeyDown(Keys.Escape))
             {
                 Close();
