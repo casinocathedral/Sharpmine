@@ -30,8 +30,7 @@ namespace Sharpmine
         {
             this.width = width;
             this.height = height;
-            this.title = title;
-
+            Title = title;
             CenterWindow(new Vector2i(width, height));
         }
 
