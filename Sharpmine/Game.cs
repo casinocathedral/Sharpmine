@@ -10,6 +10,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Sharpmine.Graphics;
+using Sharpmine.World;
 using StbImageSharp;
 
 namespace Sharpmine
@@ -17,94 +18,8 @@ namespace Sharpmine
     internal class Game : GameWindow
     {
 
-        List<Vector3> vertices = new List<Vector3>()
-        {
-            // Front face vertices
-            new Vector3(-0.5f, 0.5f, 0.5f), // topleft vert
-            new Vector3(0.5f, 0.5f, 0.5f), // topright vert
-            new Vector3(0.5f, -0.5f, 0.5f), // bottomright vert
-            new Vector3(-0.5f, -0.5f, 0.5f), // bottomleft vert
-            // Right face vertices
-            new Vector3(0.5f, 0.5f, 0.5f), // topleft vert
-            new Vector3(0.5f, 0.5f, -0.5f), // topright vert
-            new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
-            new Vector3(0.5f, -0.5f, 0.5f), // bottomleft vert
-            // Back face vertices
-            new Vector3(0.5f, 0.5f, -0.5f), // topleft vert
-            new Vector3(-0.5f, 0.5f, -0.5f), // topright vert
-            new Vector3(-0.5f, -0.5f, -0.5f), // bottomright vert
-            new Vector3(0.5f, -0.5f, -0.5f), // bottomleft vert
-            // Left face vertices
-            new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
-            new Vector3(-0.5f, 0.5f, 0.5f), // topright vert
-            new Vector3(-0.5f, -0.5f, 0.5f), // bottomright vert
-            new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
-            // Top face vertices
-            new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
-            new Vector3(0.5f, 0.5f, -0.5f), // topright vert
-            new Vector3(0.5f, 0.5f, 0.5f), // bottomright vert
-            new Vector3(-0.5f, 0.5f, 0.5f), // bottomleft vert
-            // Bottom face vertices
-            new Vector3(-0.5f, -0.5f, 0.5f), // topleft vert
-            new Vector3(0.5f, -0.5f, 0.5f), // topright vert
-            new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
-            new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
-        };
-
-        List<Vector2> texCoords = new List<Vector2>()
-        {
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
-        };
-
-        List<uint> indices = new List<uint>
-        {
-            0, 1, 2,
-            2, 3, 0,
-            4, 5, 6,
-            6, 7, 4,
-            8, 9, 10,
-            10, 11, 8, 
-            12, 13, 14,
-            14, 15, 12,
-            16, 17, 18,
-            18, 19, 16,
-            20, 21, 22,
-            22, 23, 20
-        };
-
-        // Render pipeline variables
-        VAO vao;
-        IBO ibo;
+        Chunk chunk;
         ShaderProgram program;
-        Texture texture;
 
         Camera camera;
 
@@ -132,19 +47,9 @@ namespace Sharpmine
         {
             base.OnLoad();
 
-            vao = new VAO();
-
-            VBO vbo = new VBO(vertices);
-            vao.LinkToVAO(0, 3, vbo); // Link vertex positions to VAO at location 0
-
-            VBO uvVBO = new VBO(texCoords);
-            vao.LinkToVAO(1, 2, uvVBO); // Link texture coordinates to VAO at location 1
-
-            ibo = new IBO(indices);
+            chunk = new Chunk(new Vector3(0f, 0f, 0f));
 
             program = new ShaderProgram("Default.vert", "Default.frag");
-
-            texture = new Texture("dirt.png");
 
             GL.Enable(EnableCap.DepthTest);
 
@@ -155,10 +60,6 @@ namespace Sharpmine
         protected override void OnUnload()
         {
             base.OnUnload();
-            vao.Delete();
-            ibo.Delete();
-            program.Delete();
-            texture.Delete();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -166,16 +67,10 @@ namespace Sharpmine
             GL.ClearColor(1f, 0.5f, 0.3f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            program.Bind();
-            vao.Bind();
-            ibo.Bind();
-            texture.Bind();
-
             // Transformation matrices
             Matrix4 model = Matrix4.Identity;
             Matrix4 view = camera.getViewMatrix();
             Matrix4 projection = camera.getProjectionMatrix();
-            model = Matrix4.CreateTranslation(0f, 0f, -3f);
 
             int modelLocation = GL.GetUniformLocation(program.ID, "model");
             int viewLocation = GL.GetUniformLocation(program.ID, "view");
@@ -185,8 +80,7 @@ namespace Sharpmine
             GL.UniformMatrix4(viewLocation, true, ref view);
             GL.UniformMatrix4(projectionLocation, true, ref projection);
 
-            GL.DrawElements(PrimitiveType.Triangles, indices.Count, DrawElementsType.UnsignedInt, 0);
-            //GL.DrawArrays(PrimitiveType.Triangles, 0, 4);
+            chunk.RenderChunk(program);
 
             SwapBuffers();
             base.OnRenderFrame(args);
