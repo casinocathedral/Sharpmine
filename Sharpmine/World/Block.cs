@@ -16,44 +16,67 @@ namespace Sharpmine.World
 
         private Dictionary<Faces, FaceData> faces;
 
-        List<Vector2> dirtUV = new List<Vector2>()
+        public Dictionary<Faces, List<Vector2>> blockUV = new Dictionary<Faces, List<Vector2>>()
         {
-            new Vector2(0f, 1f),
-            new Vector2(1f, 1f),
-            new Vector2(1f, 0f),
-            new Vector2(0f, 0f),
+            {Faces.FRONT, new List<Vector2>() },
+            {Faces.BACK, new List<Vector2>() },
+            {Faces.LEFT, new List<Vector2>() },
+            {Faces.RIGHT, new List<Vector2>() },
+            {Faces.TOP, new List<Vector2>() },
+            {Faces.BOTTOM, new List<Vector2>() },
         };
+
+        public Dictionary<Faces, List<Vector2>> GetUVsFromCoords(Dictionary<Faces, Vector2> coords)
+        {
+            Dictionary < Faces, List < Vector2 >> faceData = new Dictionary<Faces, List<Vector2>>();
+            foreach (var faceCoord in coords)
+            {
+                faceData[faceCoord.Key] = new List<Vector2>
+                {
+                    new Vector2((faceCoord.Value.X+1f)/16f, (faceCoord.Value.Y+1f)/16f),
+                    new Vector2(faceCoord.Value.X/16f, (faceCoord.Value.Y+1f)/16f),
+                    new Vector2(faceCoord.Value.X/16f, faceCoord.Value.Y/16f),
+                    new Vector2((faceCoord.Value.X+1f)/16f, faceCoord.Value.Y/16f),
+                };
+            }
+            return faceData;
+        }
 
         public Block(Vector3 position, BlockType blockType = BlockType.AIR)
         {
             type = blockType;
             this.position = position;
 
+            if (blockType != BlockType.AIR)
+            {
+                blockUV = GetUVsFromCoords(TextureData.blockTypeUVCoord[blockType]);
+            }
+
             faces = new Dictionary<Faces, FaceData>
             {
                 {Faces.FRONT, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.FRONT]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.FRONT]
                 } },
                 {Faces.BACK, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.BACK]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.BACK]
                 } },
                 {Faces.LEFT, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.LEFT]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.LEFT]
                 } },
                 {Faces.RIGHT, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.RIGHT]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.RIGHT]
                 } },
                 {Faces.TOP, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.TOP]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.TOP]
                 } },
                 {Faces.BOTTOM, new FaceData {
                     vertices = AddTransformedVertices(FaceDataRaw.rawVertexData[Faces.BOTTOM]),
-                    uv = dirtUV
+                    uv = blockUV[Faces.BOTTOM]
                 } },
 
             };

@@ -25,9 +25,9 @@ namespace Sharpmine.Graphics
 
             // Load the texture image
             StbImage.stbi_set_flip_vertically_on_load(1);
-            ImageResult dirtTexture = ImageResult.FromStream(File.OpenRead("../../../Textures/" + filepath), ColorComponents.RedGreenBlueAlpha);
+            ImageResult blockTexture = ImageResult.FromStream(File.OpenRead("../../../Textures/" + filepath), ColorComponents.RedGreenBlueAlpha);
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, dirtTexture.Width, dirtTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, dirtTexture.Data);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, blockTexture.Width, blockTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, blockTexture.Data);
             // Unbind the texture
             GL.BindTexture(TextureTarget.Texture2D, 0);
 

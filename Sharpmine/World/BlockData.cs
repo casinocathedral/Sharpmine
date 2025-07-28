@@ -11,6 +11,7 @@ namespace Sharpmine.World
     public enum BlockType
     {
         DIRT,
+        GRASS,
         AIR
     }
 

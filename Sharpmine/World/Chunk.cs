@@ -66,14 +66,16 @@ namespace Sharpmine.World
                 for (int z = 0; z < SIZE; z++) {
                     int columnHeight = (int)(heightMap[x, z] / 10);
                     for (int y = 0; y < HEIGHT; y++) {
-                        if (y < columnHeight)
+                        BlockType type = BlockType.AIR;
+                        if (y < columnHeight - 1)
                         {
-                            chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), BlockType.DIRT);
+                            type = BlockType.DIRT;
                         }
-                        else
+                        if (y == columnHeight - 1)
                         {
-                            chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), BlockType.AIR);
+                            type = BlockType.GRASS;
                         }
+                        chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), type);
                     }
                 }
             }
@@ -86,10 +88,13 @@ namespace Sharpmine.World
                 for (int z = 0; z < SIZE; z++)
                 {
                     int columnHeight = (int)(heightmap[x, z] / 10);
-                    for (int y = 0; y < columnHeight; y++)
+                    for (int y = 0; y < HEIGHT; y++)
                     {
                         // left faces (block to the left is empty && not farthest left in chunk)
                         int numFaces = 0;
+
+                        if (chunkBlocks[x, y, z].type == BlockType.AIR)
+                            continue; // Skip air blocks
 
                         if (x > 0)
                         {
@@ -223,7 +228,7 @@ namespace Sharpmine.World
 
             chunkIBO = new IBO(chunkIndices);
 
-            texture = new Texture("dirt.png");
+            texture = new Texture("atlas.png");
         }
 
         // Render the chunk
