@@ -52,6 +52,10 @@ namespace Sharpmine
 
             GL.Enable(EnableCap.DepthTest);
 
+            GL.FrontFace(FrontFaceDirection.Cw);
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(TriangleFace.Back);
+
             camera = new Camera(width, height, new Vector3(0f, 0f, 3f));
             CursorState = CursorState.Grabbed; // Hide the cursor and lock it to the window
         }

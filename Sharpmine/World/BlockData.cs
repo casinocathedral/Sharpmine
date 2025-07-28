@@ -8,6 +8,12 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Sharpmine.World
 {
+    public enum BlockType
+    {
+        DIRT,
+        AIR
+    }
+
     public enum Faces
     {
         FRONT,

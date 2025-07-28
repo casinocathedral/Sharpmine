@@ -28,6 +28,8 @@ namespace Sharpmine.World
 
         Texture texture;
 
+        Block[,,] chunkBlocks = new Block[SIZE, HEIGHT, SIZE];
+
         public Chunk(Vector3 position)
         {
             this.position = position;
@@ -36,23 +38,159 @@ namespace Sharpmine.World
             chunkUVs = new List<Vector2>();
             chunkIndices = new List<uint>();
 
-            GenBlocks();
+            float[,] heightMap = GenChunk(); 
+            GenBlocks(heightMap);
+            GenFaces(heightMap);
             BuildChunk();
         }
 
         // Generate chunk data
-        public void GenChunk() { }
+        public float[,] GenChunk() {
+            float[,] heightMap = new float[SIZE, SIZE];
+
+            SimplexNoise.Noise.Seed = (int)DateTime.Now.Ticks;
+            for (int x = 0; x < SIZE; x++) {
+                for (int z = 0; z < SIZE; z++) {
+                    // Generate height using Simplex noise
+                    float height = SimplexNoise.Noise.CalcPixel2D(x, z, 0.1f);
+                    heightMap[x, z] = height;
+                }
+            }
+
+            return heightMap;
+        }
 
         // Generate block faces
-        public void GenBlocks() {
-            for (int i = 0; i < 3; i++)
-            {
-                Block block = new Block(new Vector3(i, 0, 0));
-                var frontFaceData = block.GetFace(Faces.FRONT);
-                chunkVerts.AddRange(frontFaceData.vertices);
-                chunkUVs.AddRange(frontFaceData.uv);
-                AddIndices(1);
+        public void GenBlocks(float[,] heightMap) {
+            for (int x = 0; x < SIZE; x++) {
+                for (int z = 0; z < SIZE; z++) {
+                    int columnHeight = (int)(heightMap[x, z] / 10);
+                    for (int y = 0; y < HEIGHT; y++) {
+                        if (y < columnHeight)
+                        {
+                            chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), BlockType.DIRT);
+                        }
+                        else
+                        {
+                            chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), BlockType.AIR);
+                        }
+                    }
+                }
             }
+        }
+
+        public void GenFaces(float[,] heightmap)
+        {
+            for (int x = 0; x < SIZE; x++)
+            {
+                for (int z = 0; z < SIZE; z++)
+                {
+                    int columnHeight = (int)(heightmap[x, z] / 10);
+                    for (int y = 0; y < columnHeight; y++)
+                    {
+                        // left faces (block to the left is empty && not farthest left in chunk)
+                        int numFaces = 0;
+
+                        if (x > 0)
+                        {
+                            if (chunkBlocks[x - 1, y, z].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.LEFT);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.LEFT);
+                            numFaces++;
+                        }
+
+                        // right faces (block to the right is empty || farthest right in chunk)
+                        if (x < SIZE-1)
+                        {
+                            if (chunkBlocks[x + 1, y, z].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.RIGHT);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.RIGHT);
+                            numFaces++;
+                        }
+
+                        // top faces (block above is empty || farthest top in chunk)
+                        if (y < HEIGHT - 1)
+                        {
+                            if (chunkBlocks[x, y + 1, z].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.TOP);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.TOP);
+                            numFaces++;
+                        }
+
+                        // bottom faces (block below is empty || farthest bottom in chunk)
+                        if (y > 0)
+                        {
+                            if (chunkBlocks[x, y - 1, z].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.BOTTOM);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.BOTTOM);
+                            numFaces++;
+                        }
+
+                        // front faces (block in front is empty || farthest front in chunk)
+                        if (z < SIZE - 1)
+                        {
+                            if (chunkBlocks[x, y, z + 1].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.FRONT);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.FRONT);
+                            numFaces++;
+                        }
+
+                        // back faces (block behind is empty || farthest back in chunk)
+                        if (z > 0)
+                        {
+                            if (chunkBlocks[x, y, z - 1].type == BlockType.AIR)
+                            {
+                                IntegrateFace(chunkBlocks[x, y, z], Faces.BACK);
+                                numFaces++;
+                            }
+                        }
+                        else
+                        {
+                            IntegrateFace(chunkBlocks[x, y, z], Faces.BACK);
+                            numFaces++;
+                        }
+
+                        AddIndices(numFaces);
+                    }
+                }
+            }
+        }
+
+        public void IntegrateFace(Block block, Faces face)
+        {
+            FaceData faceData = block.GetFace(face);
+            chunkVerts.AddRange(faceData.vertices);
+            chunkUVs.AddRange(faceData.uv);
         }
 
         public void AddIndices(int amountFaces)

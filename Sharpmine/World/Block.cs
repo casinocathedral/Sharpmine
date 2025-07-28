@@ -11,6 +11,9 @@ namespace Sharpmine.World
     internal class Block
     {
         public Vector3 position;
+
+        public BlockType type;
+
         private Dictionary<Faces, FaceData> faces;
 
         List<Vector2> dirtUV = new List<Vector2>()
@@ -21,8 +24,9 @@ namespace Sharpmine.World
             new Vector2(0f, 0f),
         };
 
-        public Block(Vector3 position)
+        public Block(Vector3 position, BlockType blockType = BlockType.AIR)
         {
+            type = blockType;
             this.position = position;
 
             faces = new Dictionary<Faces, FaceData>
