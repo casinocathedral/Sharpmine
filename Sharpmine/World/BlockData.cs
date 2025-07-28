@@ -12,6 +12,7 @@ namespace Sharpmine.World
     {
         DIRT,
         GRASS,
+        BEDROCK,
         AIR
     }
 

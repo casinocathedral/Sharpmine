@@ -18,7 +18,7 @@ namespace Sharpmine.World
                     {Faces.RIGHT, new Vector2(2f, 15f) },
                     {Faces.BACK, new Vector2(2f, 15f) },
                     {Faces.TOP, new Vector2(2f, 15f) },
-                    {Faces.BOTTOM, new Vector2(2f, 15f) },
+                    {Faces.BOTTOM, new Vector2(2f, 15f) }
                 }
             },
             {BlockType.GRASS, new Dictionary<Faces, Vector2>()
@@ -28,7 +28,17 @@ namespace Sharpmine.World
                     {Faces.RIGHT, new Vector2(3f, 15f) },
                     {Faces.BACK, new Vector2(3f, 15f) },
                     {Faces.TOP, new Vector2(7f, 13f) },
-                    {Faces.BOTTOM, new Vector2(3f, 15f) },
+                    {Faces.BOTTOM, new Vector2(3f, 15f) }
+                }
+            },
+            {BlockType.BEDROCK, new Dictionary<Faces, Vector2>()
+                {
+                    {Faces.FRONT, new Vector2(1f, 14f) },
+                    {Faces.LEFT, new Vector2(1f, 14f) },
+                    {Faces.RIGHT, new Vector2(1f, 14f) },
+                    {Faces.BACK, new Vector2(1f, 14f) },
+                    {Faces.TOP, new Vector2(1f, 14f) },
+                    {Faces.BOTTOM, new Vector2(1f, 14f) }
                 }
             }
         };

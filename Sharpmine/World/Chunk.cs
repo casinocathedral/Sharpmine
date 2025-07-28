@@ -75,6 +75,10 @@ namespace Sharpmine.World
                         {
                             type = BlockType.GRASS;
                         }
+                        if (y == 0)                        
+                        {
+                            type = BlockType.BEDROCK;
+                        }
                         chunkBlocks[x, y, z] = new Block(new Vector3(x, y, z), type);
                     }
                 }
