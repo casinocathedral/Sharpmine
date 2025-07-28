@@ -75,11 +75,11 @@ namespace Sharpmine
             }
             if (input.IsKeyDown(Keys.Space))
             {
-                position += up * SPEED * (float)e.Time;
+                position.Y += SPEED * (float)e.Time;
             }
             if (input.IsKeyDown(Keys.LeftShift))
             {
-                position -= up * SPEED * (float)e.Time;
+                position.Y -= SPEED * (float)e.Time;
             }
 
             if (firstMove)
